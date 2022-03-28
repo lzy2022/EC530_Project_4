@@ -75,7 +75,7 @@ pars_task_id = reqparse.RequestParser()
 pars_task_id.add_argument("task_id", type=int, help="Need task ID", required=True)
 pars_file_url = reqparse.RequestParser()
 pars_file_url.add_argument("url", type=str, help="Need file url", required=True)
-class Test(Resource):
+class Speech2Text(Resource):
     def post(self):
         task["app_engine_http_request"]["headers"] = {"Content-type": "application/json"}
         args = pars_file_url.parse_args()
@@ -92,9 +92,16 @@ class Test(Resource):
     def get(self):
         args = pars_task_id.parse_args()
         task_states[args['task_id']] = 0
-        return {'testLLLL': task_results[args['task_id']]}, 202
+        return {'result': task_results[args['task_id']]}, 202
 
-api.add_resource(Test, '/test')
+class Speech2Text_taskState(Resource):
+    def get(self):
+        args = pars_task_id.parse_args()
+        t_id = args['task_id']
+        return {'task_id': t_id, 'task_state': task_states[t_id]}, 202
+
+api.add_resource(Speech2Text, '/test')
+api.add_resource(Speech2Text_taskState, '/task_state')
 
 if __name__ == "__main__":
     app.run(debug=True)
