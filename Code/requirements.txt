@@ -7,3 +7,4 @@ gunicorn==20.1.0
 google-cloud-tasks==2.7.1
 google-api-python-client
 google-cloud-speech
+google-cloud-storage

@@ -4,7 +4,7 @@ from celery import Celery
 import json
 import random
 import time
-from google.cloud import tasks_v2, speech
+from google.cloud import tasks_v2, speech, storage
 from googleapiclient import discovery
 from collections import defaultdict
 
