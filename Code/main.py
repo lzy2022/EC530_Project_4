@@ -46,13 +46,13 @@ def example_task_handler():
     client = speech.SpeechClient()
 
     # The name of the audio file to transcribe
-    payload = request.get_data(as_text=True)
+    payload = request.get_data()
     args = json.loads(payload)
-    gcs_uri = args['url']
+    content = args['file']
     t_id = args['t_id']
     #gcs_uri = "gs://cloud-samples-data/speech/brooklyn_bridge.raw"
 
-    audio = speech.RecognitionAudio(uri=gcs_uri)
+    audio = speech.RecognitionAudio(content=content)
 
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
@@ -65,23 +65,21 @@ def example_task_handler():
 
     for result in response.results:
         print("Transcript: {}".format(result.alternatives[0].transcript))
-    # task_results[10] = result.alternatives[0].transcript
-    task_results[t_id] = result.alternatives[0].transcript
+        task_results[t_id] = result.alternatives[0].transcript
     task_states[t_id] = 2
     return 'Printed task payload:',201
 
 
 pars_task_id = reqparse.RequestParser()
 pars_task_id.add_argument("task_id", type=int, help="Need task ID", required=True)
-pars_file_url = reqparse.RequestParser()
-pars_file_url.add_argument("url", type=str, help="Need file url", required=True)
+
 class Speech2Text(Resource):
     def post(self):
         task["app_engine_http_request"]["headers"] = {"Content-type": "application/json"}
-        args = pars_file_url.parse_args()
-        url = args['url']
+        s_file = request.files['file']
+        content = s_file.read()
         t_id = get_free_worker()
-        payload = json.dumps({'url': url, 't_id': t_id})
+        payload = json.dumps({'t_id': t_id, 'file': str(content)})
         task_results[t_id] = 'Loading...'
         encoded_payload = payload.encode()
         task['app_engine_http_request']['body'] = encoded_payload
@@ -98,7 +96,7 @@ class Speech2Text_taskState(Resource):
     def get(self):
         args = pars_task_id.parse_args()
         t_id = args['task_id']
-        return {'task_id': t_id, 'task_state': task_states[t_id]}, 202
+        return {'task_id': task_results[0], 'task_state': task_states[t_id]}, 202
 
 api.add_resource(Speech2Text, '/test')
 api.add_resource(Speech2Text_taskState, '/task_state')
