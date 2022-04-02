@@ -97,7 +97,7 @@ class Speech2Text_taskState(Resource):
     def get(self, task_id):
         return {'task_id': task_id, 'task_state': task_states[task_id]}, 202
 
-api.add_resource(Speech2Text, '/test/<int:task_id>')
+api.add_resource(Speech2Text, '/s2t/<int:task_id>')
 api.add_resource(Speech2Text_taskState, '/task_state/<int:task_id>')
 
 if __name__ == "__main__":

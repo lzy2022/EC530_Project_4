@@ -7,7 +7,7 @@ import sys
 BASE = "http://ec530pj4.uk.r.appspot.com/"
 
 with open('./This_is_a_test.wav', 'rb') as s_file: 
-    response = requests.post(BASE + "test/" + '0', files={'file': s_file})
+    response = requests.post(BASE + "s2t/" + '0', files={'file': s_file})
 print(response.json())
 t_id = response.json()['task_id']
 
@@ -18,7 +18,7 @@ while True:
         break
     time.sleep(0.5)
 
-response = requests.get(BASE + "test/" + str(t_id))
+response = requests.get(BASE + "s2t/" + str(t_id))
 print(response.json())
 
     
