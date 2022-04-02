@@ -1,18 +1,25 @@
 import requests
 import json
 import time
+import sys
 
+#BASE = "http://127.0.0.1:5000/"
 BASE = "http://ec530pj4.uk.r.appspot.com/"
 
-with open('./This_is_a_test.m4a', 'rb') as s_file: 
-    response = requests.post(BASE + "test", {'task_id': 4}, files={'file': s_file})
+with open('./This_is_a_test.wav', 'rb') as s_file: 
+    response = requests.post(BASE + "test/" + '0', files={'file': s_file})
 print(response.json())
+t_id = response.json()['task_id']
 
-response = requests.get(BASE + "task_state", {'url':'gs://cloud-samples-data/speech/brooklyn_bridge.raw', 'task_id': 9})
+while True:
+    response = requests.get(BASE + "task_state/" + str(t_id))
+    state = response.json()['task_state']
+    if state == 2:
+        break
+    time.sleep(0.5)
+
+response = requests.get(BASE + "test/" + str(t_id))
 print(response.json())
-#a = response.json()['testLLLL']
-#b = json.loads(a)
-#print(b['url'])
 
     
 

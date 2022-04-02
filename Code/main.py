@@ -1,3 +1,4 @@
+from re import A
 from flask_restful import Api, Resource, reqparse
 from flask import Flask, url_for, jsonify, request
 from celery import Celery
@@ -7,6 +8,7 @@ import time
 from google.cloud import tasks_v2, speech, storage
 from googleapiclient import discovery
 from collections import defaultdict
+import base64
 
 app = Flask(__name__)
 api = Api(app)
@@ -40,18 +42,16 @@ def get_free_worker():
             return i
 
 
-@app.route('/example_task_handler', methods=['POST'])
-def example_task_handler():
+@app.route('/example_task_handler/<int:t_id>', methods=['POST'])
+def example_task_handler(t_id):
     # Instantiates a client
-    client = speech.SpeechClient()
+    speech_client = speech.SpeechClient()
 
     # The name of the audio file to transcribe
     payload = request.get_data()
-    args = json.loads(payload)
-    content = args['file']
-    t_id = args['t_id']
+    content = payload
     #gcs_uri = "gs://cloud-samples-data/speech/brooklyn_bridge.raw"
-
+    task_results[t_id] = 'Task Loading...'
     audio = speech.RecognitionAudio(content=content)
 
     config = speech.RecognitionConfig(
@@ -61,10 +61,9 @@ def example_task_handler():
     )
 
     # Detects speech in the audio file
-    response = client.recognize(config=config, audio=audio)
+    response = speech_client.recognize(config=config, audio=audio)
 
     for result in response.results:
-        print("Transcript: {}".format(result.alternatives[0].transcript))
         task_results[t_id] = result.alternatives[0].transcript
     task_states[t_id] = 2
     return 'Printed task payload:',201
@@ -72,34 +71,34 @@ def example_task_handler():
 
 pars_task_id = reqparse.RequestParser()
 pars_task_id.add_argument("task_id", type=int, help="Need task ID", required=True)
-
 class Speech2Text(Resource):
-    def post(self):
+    def post(self, task_id):
         task["app_engine_http_request"]["headers"] = {"Content-type": "application/json"}
         s_file = request.files['file']
         content = s_file.read()
         t_id = get_free_worker()
-        payload = json.dumps({'t_id': t_id, 'file': str(content)})
         task_results[t_id] = 'Loading...'
-        encoded_payload = payload.encode()
+        task['app_engine_http_request']['relative_uri'] = '/example_task_handler/' + str(t_id)
+        encoded_payload = content
         task['app_engine_http_request']['body'] = encoded_payload
         response = client.create_task(parent=parent, task=task)
         task_states[t_id] = 1
+        
         return {'task_id':t_id}, 201
     
-    def get(self):
-        args = pars_task_id.parse_args()
-        task_states[args['task_id']] = 0
-        return {'result': task_results[args['task_id']]}, 202
+    def get(self, task_id):
+        if task_states[task_id] != 2:
+            return {'result': 'Loading'}, 205
+        else:
+            task_states[task_id] = 0
+            return {'result': task_results[task_id]}, 202 
 
 class Speech2Text_taskState(Resource):
-    def get(self):
-        args = pars_task_id.parse_args()
-        t_id = args['task_id']
-        return {'task_id': task_results[0], 'task_state': task_states[t_id]}, 202
+    def get(self, task_id):
+        return {'task_id': task_id, 'task_state': task_states[task_id]}, 202
 
-api.add_resource(Speech2Text, '/test')
-api.add_resource(Speech2Text_taskState, '/task_state')
+api.add_resource(Speech2Text, '/test/<int:task_id>')
+api.add_resource(Speech2Text_taskState, '/task_state/<int:task_id>')
 
 if __name__ == "__main__":
     app.run(debug=True)
