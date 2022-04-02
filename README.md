@@ -83,5 +83,5 @@ The address to get task result is [http://'sever_address'/s2t/[task_id]]. [task_
 [response] containse a dictionary with key = {'result'}. [result] is converted text message.
                                                                                         
 ## Session Examples
-A request example is in EC530_Project_4/Code/API_test.py. The example use the sample speech file in EC530_Project_4/Code/This_is_a_test.wav
-![alt text](https://github.com/lzy2022/EC530_Project_4/raw/main/Images/EX1.PNG). A sample google cloud sever is set.
+A request example is in EC530_Project_4/Code/API_test.py. The example use the sample speech file in EC530_Project_4/Code/This_is_a_test.wav. A sample google cloud sever is set.
+![alt text](https://github.com/lzy2022/EC530_Project_4/raw/main/Images/EX1.PNG)
