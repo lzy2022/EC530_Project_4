@@ -83,5 +83,5 @@ The address to get task result is [http://'sever_address'/s2t/[task_id]]. [task_
 [response] containse a dictionary with key = {'result'}. [result] is converted text message.
                                                                                         
 ## Session Examples
-The first step is to download the database framework using the module [db_setup.py], the downloaded framework is named [Example_db.db]. The example then sets up a local sever connected to []Example_db.db and open the default python http port :5000, the address of the sever is http://127.0.0.1:5000/
-![alt text](https://github.com/lzy2022/S2022_EC530_Project2/raw/main/Images/EX1.PNG)
+A request example is in EC530_Project_4/Code/API_test.py. The example use the sample speech file in EC530_Project_4/Code/This_is_a_test.wav
+![alt text](https://github.com/lzy2022/EC530_Project_4/raw/main/Images/EX1.PNG)
