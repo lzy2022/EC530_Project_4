@@ -42,6 +42,7 @@ This project is designed for google cloud. To set up the sever, just run the fol
         gcloud app deploy
 
 The google cloud sever should have the following APIs enabled:
+
         google cloud speech to text API
         google-api-python-client
         google-cloud-tasks==2.7.1
